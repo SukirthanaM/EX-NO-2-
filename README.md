@@ -24,20 +24,157 @@ To encrypt a message, one would break the message into digrams (groups of 2 lett
  
 
 ## ALGORITHM:
-
 STEP-1: Read the plain text from the user.
+
 STEP-2: Read the keyword from the user.
+
 STEP-3: Arrange the keyword without duplicates in a 5*5 matrix in the row order and fill the remaining cells with missed out letters in alphabetical order. Note that ‘i’ and ‘j’ takes the same cell.
+
 STEP-4: Group the plain text in pairs and match the corresponding corner letters by forming a rectangular grid.
+
 STEP-5: Display the obtained cipher text.
 
 
+## Program:
+```
+#include <stdio.h> 
+#include <string.h> 
+#include <ctype.h> 
+#define SIZE 5 
+ 
+char matrix[SIZE][SIZE]; 
+void generateMatrix(char key[]) { 
+    int alphabet[26] = {0}; 
+    int row = 0, col = 0; 
+    int k = 0; 
+     
+    for (int i = 0; key[i]; i++) { 
+        char ch = toupper(key[i]); 
+        if (ch == 'J') ch = 'I'; 
+        if (!alphabet[ch - 'A']) { 
+            matrix[row][col++] = ch; 
+            alphabet[ch - 'A'] = 1; 
+            if (col == SIZE) { 
+                col = 0; 
+                row++; 
+            } 
+        } 
+    } 
+ 
+    for (char ch = 'A'; ch <= 'Z'; ch++) { 
+        if (ch == 'J') continue; 
+        if (!alphabet[ch - 'A']) { 
+            matrix[row][col++] = ch; 
+            alphabet[ch - 'A'] = 1; 
+            if (col == SIZE) { 
+                col = 0; 
+                row++; 
+            } 
+        } 
+    } 
+} 
+void findPosition(char ch, int *row, int *col) { 
+    if (ch == 'J') ch = 'I'; 
+    for (int i = 0; i < SIZE; i++) { 
+        for (int j = 0; j < SIZE; j++) { 
+            if (matrix[i][j] == ch) { 
+                *row = i; 
+                *col = j; 
+                return; 
+            } 
+        } 
+    } 
+} 
+ 
+void encrypt(char digraph[], char result[]) { 
+    int r1, c1, r2, c2; 
+    findPosition(digraph[0], &r1, &c1); 
+    findPosition(digraph[1], &r2, &c2); 
+ 
+    if (r1 == r2) { 
+        result[0] = matrix[r1][(c1 + 1) % SIZE]; 
+        result[1] = matrix[r2][(c2 + 1) % SIZE]; 
+    } else if (c1 == c2) { 
+        result[0] = matrix[(r1 + 1) % SIZE][c1]; 
+        result[1] = matrix[(r2 + 1) % SIZE][c2]; 
+    } else { 
+        result[0] = matrix[r1][c2]; 
+        result[1] = matrix[r2][c1]; 
+    } 
+} 
+int prepareText(char *input, char digraphs[][2]) { 
+    int len = 0, i = 0; 
+    while (input[i]) { 
+        char a = toupper(input[i]); 
+        if (a == 'J') a = 'I'; 
+        if (!isalpha(a)) { 
+            i++; 
+            continue; 
+        } 
+ 
+        char b = toupper(input[i+1]); 
+        if (b == 'J') b = 'I'; 
+ 
+        if (!isalpha(b) || a == b) { 
+            digraphs[len][0] = a; 
+            digraphs[len][1] = 'X';  // padding 
+            len++; 
+            i++; 
+        } else { 
+            digraphs[len][0] = a; 
+            digraphs[len][1] = b; 
+            len++; 
+            i += 2; 
+        } 
+    } 
+ 
+    if (len > 0 && digraphs[len - 1][1] == '\0') { 
+        digraphs[len - 1][1] = 'X'; 
+    } 
+ 
+    return len; 
+} 
+void displayMatrix() { 
+    printf("Playfair Matrix:\n"); 
+    for (int i = 0; i < SIZE; i++) { 
+        for (int j = 0; j < SIZE; j++) { 
+            printf("%c ", matrix[i][j]); 
+        } 
+        printf("\n"); 
+    } 
+} 
+ 
+int main() { 
+    char key[] = "KEYWORD";  // You can change this key 
+    char plaintext[] = "Sukirthana"; 
+    char digraphs[50][2]; 
+    char encryptedText[100] = ""; 
+    char encryptedPair[3]; 
+    encryptedPair[2] = '\0'; 
+ 
+    generateMatrix(key); 
+    displayMatrix(); 
+ 
+    int count = prepareText(plaintext, digraphs); 
+ 
+    printf("\nPlaintext Digraphs:\n"); 
+    for (int i = 0; i < count; i++) { 
+        printf("%c%c ", digraphs[i][0], digraphs[i][1]); 
+    } 
+ 
+    printf("\n\nEncrypted Text: "); 
+    for (int i = 0; i < count; i++) { 
+        encrypt(digraphs[i], encryptedPair); 
+        strcat(encryptedText, encryptedPair); 
+        printf("%s ", encryptedPair); 
+    } 
+ 
+printf("\n\nFinal Encrypted Output: %s\n", encryptedText); 
+return 0; 
+}
+```
+## Output:
+<img width="446" height="255" alt="image" src="https://github.com/user-attachments/assets/29db1305-35b1-494f-b57b-dea92b664d1e" />
 
-
-Program:
-
-
-
-
-
-Output:
+## Result:
+Thus the implementation of play fair cipher had been executed successfully.
